@@ -714,18 +714,53 @@ function register() {
   updateNav(); hideRegister(); render(); alert("Registered as " + username);
 }
 
+function findUser(identity) {
+  return users.find(x => x.username === identity || x.email === identity);
+}
+
 function loginUser() {
-  const username = document.getElementById("login-username").value.trim();
+  const input = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
-  if (!username || !password) { alert("All fields required."); return; }
-  const u = users.find(x => x.username === username);
+  if (!input || !password) { alert("All fields required."); return; }
+  const u = findUser(input);
   if (!u) { alert("User not found."); return; }
   if (u.password !== password) { alert("Wrong password."); return; }
-  currentUser = username;
+  currentUser = u.username;
   localStorage.setItem("velog_current_user", currentUser);
   document.getElementById("login-username").value = "";
   document.getElementById("login-password").value = "";
-  updateNav(); hideRegister(); render(); alert("Welcome back, " + username + "!");
+  updateNav(); hideRegister(); render(); alert("Welcome back, " + u.username + "!");
+}
+
+function showReset() {
+  hideRegister();
+  document.getElementById("reset-identity").value = "";
+  document.getElementById("reset-result").classList.add("hidden");
+  document.getElementById("reset-overlay").classList.remove("hidden");
+}
+function hideReset() { document.getElementById("reset-overlay").classList.add("hidden"); }
+
+function findReset() {
+  const identity = document.getElementById("reset-identity").value.trim();
+  if (!identity) { alert("Enter username or email."); return; }
+  const u = findUser(identity);
+  if (!u) { alert("No account found with that username/email."); return; }
+  document.getElementById("reset-show-pw").textContent = u.password;
+  document.getElementById("reset-new-pw").value = "";
+  document.getElementById("reset-result").classList.remove("hidden");
+}
+
+function confirmReset() {
+  const identity = document.getElementById("reset-identity").value.trim();
+  const newPw = document.getElementById("reset-new-pw").value.trim();
+  if (!newPw || newPw.length < 4) { alert("New password min 4 characters."); return; }
+  const u = findUser(identity);
+  if (!u) { alert("User not found."); return; }
+  u.password = newPw;
+  localStorage.setItem("velog_users", JSON.stringify(users));
+  alert("Password changed successfully! Login with your new password.");
+  hideReset();
+  showLogin();
 }
 
 function logout() {

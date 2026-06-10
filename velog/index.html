@@ -95,8 +95,9 @@
         </div>
       </div>
       <div id="auth-login" class="hidden">
-        <input type="text" id="login-username" placeholder="Username">
+        <input type="text" id="login-username" placeholder="Username or Email">
         <input type="password" id="login-password" placeholder="Password">
+        <div class="login-forgot"><span class="forgot-link" onclick="showReset()">Forgot Password?</span></div>
         <div class="register-actions">
           <button class="cancel-btn" onclick="hideRegister()">Cancel</button>
           <button class="save-btn" onclick="loginUser()">Login</button>
@@ -287,6 +288,27 @@
       <div class="rent-actions">
         <button class="cancel-btn" onclick="hideRentAd()">Cancel</button>
         <button class="save-btn" onclick="rentAd()">Rent Now (7 days)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="reset-overlay" class="overlay hidden">
+    <div class="reset-modal">
+      <div class="reset-header">
+        <h2>Reset Password</h2>
+        <button class="close-btn" onclick="hideReset()">&times;</button>
+      </div>
+      <p class="reset-info">Enter your registered username or email to reset your password.</p>
+      <input type="text" id="reset-identity" placeholder="Username or Email">
+      <div id="reset-result" class="reset-result hidden">
+        <p>Your password is: <strong id="reset-show-pw"></strong></p>
+        <p class="reset-hint">You can also set a new password below:</p>
+        <input type="password" id="reset-new-pw" placeholder="New password (min 4 chars)">
+        <button class="save-btn" onclick="confirmReset()">Change Password</button>
+      </div>
+      <div class="reset-actions">
+        <button class="cancel-btn" onclick="hideReset()">Cancel</button>
+        <button class="save-btn" id="reset-find-btn" onclick="findReset()">Find & Reset</button>
       </div>
     </div>
   </div>
