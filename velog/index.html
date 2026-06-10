@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velog</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2312b886'/><text x='50' y='68' font-size='56' font-weight='900' fill='white' text-anchor='middle' font-family='sans-serif'>V</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo"><span class="logo-icon">[V]</span> Velog</a>
+      <div class="nav-actions">
+        <button class="home-btn" onclick="goHome()">&#127968; Home</button>
+        <span id="nav-user" class="nav-user hidden"></span>
+        <button id="nft-btn" class="nft-btn hidden" onclick="showNFT()">&#127912; NFT</button>
+        <button id="wallet-btn" class="wallet-btn hidden" onclick="showWallet()">&#9733; Wallet</button>
+        <button id="profile-btn" class="profile-btn hidden" onclick="showProfile()">Profile</button>
+        <button id="chat-btn" class="chat-btn hidden" onclick="showChat()">&#128172; Chat</button>
+        <button id="register-btn" class="register-btn" onclick="showRegister()">Register</button>
+        <button id="login-btn" class="login-btn" onclick="showLogin()">Login</button>
+        <button id="logout-btn" class="logout-btn hidden" onclick="logout()">Logout</button>
+        <button class="write-btn" onclick="showEditor()">Write</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <main>
+      <div class="posts-header">
+        <h1>Recent Posts</h1>
+      </div>
+      <div id="posts-container" class="posts-grid"></div>
+      <div id="empty-state" class="empty-state">
+        <p>No posts yet.</p>
+        <button onclick="showEditor()">Write your first post</button>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h3>Ad Space</h3>
+        <button id="rent-ad-btn" class="rent-btn hidden" onclick="showRentAd()">+ Rent</button>
+      </div>
+      <div id="ad-container" class="ad-container"></div>
+      <div class="ad-empty" id="ad-empty">
+        <p>No ads yet.</p>
+        <p class="ad-hint">Register to rent this space</p>
+      </div>
+    </aside>
+  </div>
+
+  <div id="editor-overlay" class="overlay hidden">
+    <div class="editor-modal">
+      <div class="editor-header">
+        <h2 id="editor-title">New Post</h2>
+        <button class="close-btn" onclick="hideEditor()">&times;</button>
+      </div>
+      <input type="text" id="post-title" placeholder="Post title..." maxlength="100">
+      <div class="upload-area">
+        <label class="upload-btn"><span>&#128247;</span> Add Image<input type="file" id="image-input" accept="image/*" onchange="handleImage(event)"></label>
+        <label class="upload-btn video-btn"><span>&#127916;</span> Add Video (max 30s)<input type="file" id="video-input" accept="video/*" onchange="handleVideo(event)"></label>
+      </div>
+      <div id="media-preview" class="media-preview"></div>
+      <textarea id="post-body" placeholder="Write your story..." rows="10"></textarea>
+      <div class="editor-footer">
+        <label class="tag-label">Tags (comma separated):</label>
+        <input type="text" id="post-tags" placeholder="e.g. JavaScript, Web, Design">
+        <div class="editor-actions">
+          <button class="cancel-btn" onclick="hideEditor()">Cancel</button>
+          <button class="save-btn" onclick="savePost()">Publish</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="register-overlay" class="overlay hidden">
+    <div class="register-modal">
+      <div class="register-header">
+        <h2 id="auth-title">Register</h2>
+        <button class="close-btn" onclick="hideRegister()">&times;</button>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="auth-tab-reg" onclick="switchAuth('reg')">Register</button>
+        <button class="auth-tab" id="auth-tab-login" onclick="switchAuth('login')">Login</button>
+      </div>
+      <div id="auth-reg">
+        <input type="text" id="reg-username" placeholder="Username" maxlength="30">
+        <input type="email" id="reg-email" placeholder="Email">
+        <input type="password" id="reg-password" placeholder="Password (min 4 chars)">
+        <div class="register-actions">
+          <button class="cancel-btn" onclick="hideRegister()">Cancel</button>
+          <button class="save-btn" onclick="register()">Register</button>
+        </div>
+      </div>
+      <div id="auth-login" class="hidden">
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <div class="register-actions">
+          <button class="cancel-btn" onclick="hideRegister()">Cancel</button>
+          <button class="save-btn" onclick="loginUser()">Login</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="profile-overlay" class="overlay hidden">
+    <div class="profile-modal">
+      <div class="profile-header">
+        <h2>Profile</h2>
+        <button class="close-btn" onclick="hideProfile()">&times;</button>
+      </div>
+      <div class="profile-avatar" id="profile-avatar">V</div>
+      <div class="profile-info">
+        <h3 id="profile-username"></h3>
+        <p id="profile-email"></p>
+        <p id="profile-joined"></p>
+      </div>
+      <div class="profile-stats">
+        <div class="stat-card"><span class="stat-num" id="stat-posts">0</span><span class="stat-label">Posts</span></div>
+        <div class="stat-card"><span class="stat-num" id="stat-views">0</span><span class="stat-label">Total Views</span></div>
+        <div class="stat-card"><span class="stat-num" id="stat-ads">0</span><span class="stat-label">Ads Rented</span></div>
+      </div>
+      <button class="logout-from-profile" onclick="logout(); hideProfile();">Logout</button>
+    </div>
+  </div>
+
+  <div id="wallet-overlay" class="overlay hidden">
+    <div class="wallet-modal">
+      <div class="wallet-header">
+        <h2>&#9733; My Wallet</h2>
+        <button class="close-btn" onclick="hideWallet()">&times;</button>
+      </div>
+      <div class="wallet-tabs">
+        <button class="wallet-tab active" id="tab-send" onclick="switchWalletTab('send')">Send</button>
+        <button class="wallet-tab" id="tab-receive" onclick="switchWalletTab('receive')">Receive</button>
+      </div>
+      <div class="wallet-total" id="wallet-total">$0.00</div>
+
+      <div id="wallet-send" class="wallet-panel">
+        <div class="wallet-coins">
+          <div class="coin-card btc-card">
+            <div class="coin-top">
+              <span class="coin-icon">&#8383;</span>
+              <span class="coin-name">Bitcoin</span>
+              <span class="coin-balance" id="btc-balance">0.00000000</span>
+            </div>
+            <div class="coin-addr-row">
+              <span class="addr-label">Your BTC:</span>
+              <span class="addr-val-sm" id="btc-my-addr-s"></span>
+              <button class="small-btn" onclick="editAddress('btc')" title="Edit">&#9998;</button>
+            </div>
+            <div class="coin-send">
+              <input type="text" id="btc-to" placeholder="Address or username" class="send-input" list="member-list" oninput="resolveMember('btc')">
+              <input type="text" id="btc-amount" placeholder="Amount (BTC)" class="send-input">
+              <button class="send-btn" onclick="sendCrypto('btc')">Send BTC</button>
+            </div>
+          </div>
+          <div class="coin-card shib-card">
+            <div class="coin-top">
+              <span class="coin-icon coin-shib">&#128049;</span>
+              <span class="coin-name">Shiba Inu</span>
+              <span class="coin-balance" id="shib-balance">0</span>
+            </div>
+            <div class="coin-addr-row">
+              <span class="addr-label">Your SHIB:</span>
+              <span class="addr-val-sm" id="shib-my-addr-s"></span>
+              <button class="small-btn" onclick="editAddress('shib')" title="Edit">&#9998;</button>
+            </div>
+            <div class="coin-send">
+              <input type="text" id="shib-to" placeholder="Address or username" class="send-input" list="member-list" oninput="resolveMember('shib')">
+              <input type="text" id="shib-amount" placeholder="Amount (SHIB)" class="send-input">
+              <button class="send-btn" onclick="sendCrypto('shib')">Send SHIB</button>
+            </div>
+          </div>
+        </div>
+        <datalist id="member-list"></datalist>
+        <div class="wallet-tx">
+          <h3>Transactions</h3>
+          <div id="tx-list" class="tx-list"><p class="tx-empty">No transactions yet</p></div>
+        </div>
+      </div>
+
+      <div id="wallet-receive" class="wallet-panel hidden">
+        <p class="receive-info">Share your address below to receive coins:</p>
+        <div class="receive-card btc-receive">
+          <div class="receive-qr-wrap">
+            <img id="btc-qr" class="qr-img" src="" alt="BTC QR">
+            <div class="receive-detail">
+              <strong>Bitcoin</strong>
+              <div class="receive-addr-wrap">
+                <input type="text" class="receive-addr-input" id="btc-receive-addr" onchange="saveAddress('btc')">
+                <button class="small-btn" onclick="editAddress('btc')" title="Edit">&#9998;</button>
+              </div>
+              <div class="receive-btns">
+                <button class="copy-btn-lg" onclick="copyAddr('btc')">&#128203; Copy</button>
+                <button class="gen-btn-lg" onclick="genNewAddr('btc')">&#9889; New</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="receive-card shib-receive">
+          <div class="receive-qr-wrap">
+            <img id="shib-qr" class="qr-img" src="" alt="SHIB QR">
+            <div class="receive-detail">
+              <strong>Shiba Inu</strong>
+              <div class="receive-addr-wrap">
+                <input type="text" class="receive-addr-input" id="shib-receive-addr" onchange="saveAddress('shib')">
+                <button class="small-btn" onclick="editAddress('shib')" title="Edit">&#9998;</button>
+              </div>
+              <div class="receive-btns">
+                <button class="copy-btn-lg" onclick="copyAddr('shib')">&#128203; Copy</button>
+                <button class="gen-btn-lg" onclick="genNewAddr('shib')">&#9889; New</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="nft-overlay" class="overlay hidden">
+    <div class="nft-modal">
+      <div class="nft-header">
+        <h2>&#127912; NFT Marketplace</h2>
+        <div class="nft-header-actions">
+          <button class="nft-mint-btn" onclick="showMintNFT()">+ Mint NFT</button>
+          <button class="close-btn" onclick="hideNFT()">&times;</button>
+        </div>
+      </div>
+      <div class="nft-tabs">
+        <button class="nft-tab active" id="nft-tab-market" onclick="switchNFTTab('market')">Market</button>
+        <button class="nft-tab" id="nft-tab-mine" onclick="switchNFTTab('mine')">My NFTs</button>
+      </div>
+      <div id="nft-market" class="nft-panel">
+        <div id="nft-grid" class="nft-grid"></div>
+        <div id="nft-empty" class="nft-empty"><p>No NFTs listed for sale.</p></div>
+      </div>
+      <div id="nft-mine" class="nft-panel hidden">
+        <div id="nft-my-grid" class="nft-grid"></div>
+        <div id="nft-my-empty" class="nft-empty"><p>You don't own any NFTs yet.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mint-nft-overlay" class="overlay hidden">
+    <div class="mint-modal">
+      <div class="mint-header">
+        <h2>Mint New NFT</h2>
+        <button class="close-btn" onclick="hideMintNFT()">&times;</button>
+      </div>
+      <input type="text" id="nft-name" placeholder="NFT name" maxlength="60">
+      <textarea id="nft-desc" placeholder="Description" rows="3"></textarea>
+      <label class="upload-btn nft-upload"><span>&#128247;</span> Upload Image<input type="file" id="nft-image-input" accept="image/*" onchange="handleNFTImage(event)"></label>
+      <div id="nft-image-preview" class="nft-image-preview hidden"><img id="nft-preview-img" src=""></div>
+      <div class="nft-price-row">
+        <input type="text" id="nft-price" placeholder="Price" class="nft-price-input">
+        <select id="nft-coin" class="nft-coin-select">
+          <option value="btc">BTC</option>
+          <option value="shib">SHIB</option>
+        </select>
+      </div>
+      <div class="mint-actions">
+        <button class="cancel-btn" onclick="hideMintNFT()">Cancel</button>
+        <button class="save-btn" onclick="mintNFT()">Mint & List</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rent-ad-overlay" class="overlay hidden">
+    <div class="rent-modal">
+      <div class="rent-header">
+        <h2>Rent Ad Space</h2>
+        <button class="close-btn" onclick="hideRentAd()">&times;</button>
+      </div>
+      <div class="rent-info">
+        <p><strong>Rental:</strong> 7 days per slot</p>
+        <p><strong>Slots available:</strong> <span id="slots-left">3</span>/3</p>
+      </div>
+      <input type="text" id="ad-title" placeholder="Ad title / brand name" maxlength="50">
+      <input type="url" id="ad-link" placeholder="Link URL (e.g. https://...)" onkeyup="adLinkPreview()">
+      <label class="upload-btn ad-upload"><span>&#128247;</span> Upload Ad Image<input type="file" id="ad-image-input" accept="image/*" onchange="handleAdImage(event)"></label>
+      <div id="ad-preview" class="ad-preview hidden">
+        <img id="ad-preview-img" src="" alt="">
+      </div>
+      <div class="rent-actions">
+        <button class="cancel-btn" onclick="hideRentAd()">Cancel</button>
+        <button class="save-btn" onclick="rentAd()">Rent Now (7 days)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="chat-overlay" class="overlay hidden">
+    <div class="chat-modal">
+      <div class="chat-header">
+        <h2>&#128172; Chat</h2>
+        <div class="chat-header-info"><span id="chat-online">0</span> online</div>
+        <button class="close-btn" onclick="hideChat()">&times;</button>
+      </div>
+      <div id="chat-msgs" class="chat-msgs">
+        <div class="chat-welcome">Welcome to Velog Chat!</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-send-btn" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-overlay" class="overlay hidden">
+    <div class="view-modal">
+      <div class="view-header">
+        <h2 id="view-title"></h2>
+        <button class="close-btn" onclick="hideView()">&times;</button>
+      </div>
+      <div class="view-meta">
+        <span id="view-date"></span>
+        <span id="view-tags"></span>
+        <span id="view-views"></span>
+      </div>
+      <div id="view-media" class="view-media"></div>
+      <div id="view-body" class="view-body"></div>
+      <div class="view-actions">
+        <button class="edit-btn" onclick="editPost()">Edit</button>
+        <button class="delete-btn" onclick="deletePost()">Delete</button>
+      </div>
+      <div class="comments-section">
+        <h3 class="comments-title">Comments <span id="comment-count">0</span></h3>
+        <div id="comments-list" class="comments-list"></div>
+        <div class="comment-input-row">
+          <input type="text" id="comment-input" placeholder="Write a comment..." maxlength="500" onkeydown="if(event.key==='Enter')addComment()">
+          <button class="comment-send-btn" onclick="addComment()">Post</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
